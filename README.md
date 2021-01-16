@@ -1,8 +1,11 @@
 Abuse README
 ============
 
-This is a fork of the Abuse SDL2 port from http://github.com/Xenoveritas/abuse,
+This is a [Playstation4] fork of [a fork of] the Abuse SDL2 port from http://github.com/Xenoveritas/abuse,
 which itself is a fork of the Abuse SDL port from http://abuse.zoy.org.
+
+It currently runs, but requires some love ... audio falls off ? (only tested via remote stream)
+Input from SDL : does gamepad (not joystick) input not work in my SDL port?
 
 --------
 
