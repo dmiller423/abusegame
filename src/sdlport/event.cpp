@@ -73,9 +73,11 @@ void EventHandler::SysWarpMouse(ivec2 pos)
 // IsPending()
 // Are there any events in the queue?
 //
+SDL_Event sdlev;
+
 int EventHandler::IsPending()
 {
-    if (!m_pending && SDL_PollEvent(NULL))
+    if (!m_pending && SDL_PollEvent(&sdlev))
         m_pending = 1;
 
     return m_pending;
@@ -97,11 +99,13 @@ void EventHandler::SysEvent(Event &ev)
     ev.mouse_button = m_button;
 
     // Gather next event
-    SDL_Event sdlev;
-    if (!SDL_PollEvent(&sdlev))
-        return; // This should not happen
+    //if (!SDL_PollEvent(&sdlev))
+    //    return; // This should not happen
+
 
 	// Sort the mouse out
+
+#if _WANT_MOUSE
 	int x, y;
 	uint8_t buttons = SDL_GetMouseState(&x, &y);
 
@@ -174,6 +178,9 @@ void EventHandler::SysEvent(Event &ev)
     m_pos = ivec2(ev.mouse_move.x, ev.mouse_move.y);
     m_button = ev.mouse_button;
 
+#endif	// _WANT_MOUSE
+
+
     // Sort out other kinds of events
     switch(sdlev.type)
     {
@@ -192,6 +199,8 @@ void EventHandler::SysEvent(Event &ev)
             calculate_mouse_scaling();
             break;
         }
+
+#if _WANT_MOUSE
     case SDL_MOUSEWHEEL:
         if (m_ignore_wheel_events)
             break;
@@ -255,6 +264,8 @@ void EventHandler::SysEvent(Event &ev)
             break;
         }
         break;
+#endif
+
     case SDL_KEYDOWN:
     case SDL_KEYUP:
 		//AR EV_SPURIOUS has the same value as JK_SPACE, so this is probably all wrong
@@ -496,7 +507,8 @@ void EventHandler::SysEvent(Event &ev)
 		switch (sdlev.caxis.axis)
 		{
 		case SDL_CONTROLLER_AXIS_LEFTX:
-			if(abs(sdlev.caxis.value) >= settings.ctr_lst_dzx) use_left_stick = true;//enable the left stick			
+		//	if(abs(sdlev.caxis.value) >= settings.ctr_lst_dzx)
+				use_left_stick = true;//enable the left stick			
 
 			if(use_left_stick)
 			{

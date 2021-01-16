@@ -11,6 +11,8 @@
 #ifndef __SPECS_HPP_
 #define __SPECS_HPP_
 
+#include <cstdint>	// ffs
+
 #include <stdio.h>
 #include <fcntl.h>
 #include <stdlib.h>

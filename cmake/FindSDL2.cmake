@@ -85,12 +85,21 @@
 # (To distribute this file outside of CMake, substitute the full
 #  License text for the above reference.)
 
+SET(SDL2_SEARCH_PATHS
+	c:/dev/libs
+	C:/dev/libs/SDL/
+	${SDL2_PATH}
+	"${PS4SDK}/portlibs"
+)
+
 find_path(SDL2_INCLUDE_DIR SDL.h
   HINTS
     ENV SDL2DIR
   PATH_SUFFIXES SDL2 SDL
                 # path suffixes to search inside ENV{SDL2DIR}
                 include/SDL2 include/SDL include
+	PATHS ${SDL2_SEARCH_PATHS}
+	
 )
 
 if(CMAKE_SIZEOF_VOID_P EQUAL 8)

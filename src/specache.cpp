@@ -66,6 +66,7 @@ spec_directory *spec_directory_cache::get_spec_directory(char const *filename, b
   int need_close=0;
   if (!fp)
   {
+	printf("---%s(\"%s\") \n", __func__, filename);
     fp=open_file(filename,"rb");
     if (fp->open_failure())
     {

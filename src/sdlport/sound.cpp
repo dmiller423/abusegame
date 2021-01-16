@@ -40,6 +40,35 @@ extern Settings settings;
 static int sound_enabled = 0;
 static SDL_AudioSpec audioObtained;
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#ifdef PS4
+#include <unistd.h>
+
+extern "C" int syscall(int, ...);
+
+int lstat(const char *path, struct stat *sb)
+{
+	return syscall(190, path, sb);
+}
+
+#endif
+
+#if !defined(S_ISREG) && defined(S_IFMT) && defined(S_IFREG)
+#define S_ISREG(m) (((m) & S_IFMT) == S_IFREG)
+#endif
+#if !defined(S_ISDIR) && defined(S_IFMT) && defined(S_IFDIR)
+#define S_ISDIR(m) (((m) & S_IFMT) == S_IFDIR)
+#endif
+
+
+inline static uint32_t _mode(const char* sPath) { struct stat sb; if(0==stat(sPath, &sb)) { return sb.st_mode; } return 0; }
+
+inline static bool existsDir (const char* sPath)  { return !!S_ISDIR(_mode(sPath)); }
+inline static bool existsFile(const char* sPath)  { return !!S_ISREG(_mode(sPath)); }
+
+
+
 //
 // sound_init()
 // Initialise audio
@@ -55,10 +84,17 @@ int sound_init( int argc, char **argv )
     datadir = get_filename_prefix();
     sfxdir = (char *)malloc( strlen( datadir ) + 5 + 1 );
     sprintf( sfxdir, "%ssfx", datadir );
+
+	printf("$$$$$$$$ BUSTED BITCH : datadir: \"%s\" /sfx !!\n", datadir);
+	if(!existsDir(datadir)) {
+		printf("@@@@@@@@@@@@@@@@@@@@@@ DOES NOT EXIST !!!!\n");
+	}
 #ifdef WIN32
     // Attempting to fopen a directory under Windows will fail, and
     // opendir does not exist. Use GetFileAttributes instead.
     if( GetFileAttributes( sfxdir ) == INVALID_FILE_ATTRIBUTES )
+#elif defined(PS4)
+	if(!existsDir(sfxdir))
 #else
     FILE *fd = NULL;
     if( (fd = fopen( sfxdir,"r" )) == NULL )

@@ -23,7 +23,7 @@
 #endif
 #include <ctype.h>
 #include <setjmp.h>
-#ifdef HAVE_UNISTD_H
+#if defined(HAVE_UNISTD_H) || defined(PS4)
 # include <unistd.h>
 #endif
 
@@ -2410,11 +2410,37 @@ void game_net_init(int argc, char **argv)
   }
 }
 
+#if defined(PS4)
+extern "C" void jailbreak(const int);
+extern "C" int get_fw_version();
+extern "C" void sceSystemServiceHideSplashScreen();
+
+void debugListApp0();
+
+unsigned int sceLibcHeapExtendedAlloc = 1;  /* Switch to dynamic allocation */
+size_t       sceLibcHeapSize = SCE_LIBC_HEAP_SIZE_EXTENDED_ALLOC_NO_LIMIT;
+size_t       sceLibcHeapInitialSize = (1024*1024*256);
+unsigned int sceLibcHeapDebugFlags = SCE_LIBC_HEAP_DEBUG_SHORTAGE;
+#endif
+
 int main(int argc, char *argv[])
 {
+	std::string sep = std::string(80,'#') + "\n";
+
+#if defined(PS4)
+	//jailbreak(get_fw_version());
+	sceSystemServiceHideSplashScreen();
+
+	printf(sep.c_str());	
+	printf("------ Abuse Game -----\n");
+	printf(sep.c_str());	
+
+	debugListApp0();
+#endif
+
     start_argc = argc;
     start_argv = argv;
-
+	
     for (int i = 0; i < argc; i++)
     {
         if (!strcmp(argv[i], "-cprint"))
@@ -2456,19 +2482,23 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Using %s\n", tcpip.name());
 #endif
 
+	printf(sep.c_str());	printf("------ b -----\n");	printf(sep.c_str());
     set_dprinter(game_printer);
     set_dgetter(game_getter);
     set_no_space_handler(handle_no_space);
 
+	printf(sep.c_str());	printf("------ c -----\n");	printf(sep.c_str());
     setup(argc, argv);
 
+	printf(sep.c_str());	printf("------ d -----\n");	printf(sep.c_str());
     show_startup();
 
+	printf(sep.c_str());	printf("------ e -----\n");	printf(sep.c_str());
     start_sound(argc, argv);
 
     stat_man = new text_status_manager();
 
-#if !defined __CELLOS_LV2__
+#if !defined(__CELLOS_LV2__) && !defined(PS4)
     // look to see if we are supposed to fetch the data elsewhere
     if (getenv("ABUSE_PATH"))
         set_filename_prefix(getenv("ABUSE_PATH"));
@@ -2476,13 +2506,18 @@ int main(int argc, char *argv[])
     // look to see if we are supposed to save the data elsewhere
     if (getenv("ABUSE_SAVE_PATH"))
         set_save_filename_prefix(getenv("ABUSE_SAVE_PATH"));
+#elif defined(PS4)
+	set_filename_prefix("/app0");	// i swear this doesn't do anything
 #endif
 
     jrand_init();
     jrand(); // so compiler doesn't complain
 
+	printf(sep.c_str());	printf("------ f -----\n");	printf(sep.c_str());
     set_spec_main_file("abuse.spe");
+	printf(sep.c_str());	printf("------ g -----\n");	printf(sep.c_str());
     check_for_lisp(argc, argv);
+	printf(sep.c_str());	printf("------ h -----\n");	printf(sep.c_str());
 
     do
     {
@@ -2663,5 +2698,9 @@ int main(int argc, char *argv[])
 
     sound_uninit();
 
+	printf(sep.c_str());	printf("------ ZZz -----\n");	printf(sep.c_str());
+#ifdef PS4
+	while(1) { usleep(1000); }
+#endif
     return 0;
 }

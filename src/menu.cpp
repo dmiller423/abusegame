@@ -176,8 +176,11 @@ int menu(void *args, JCFont *font)             // reurns -1 on esc
     if (wm->IsPending())
     {
       wm->get_event(ev);
+	  printf("menu() ev.type: %d , ev.key: %d \n", ev.type, ev.key);
+
       if (ev.type==EV_KEY)
       {
+
     switch (ev.key)
     {
       case JK_ESC :
@@ -273,6 +276,7 @@ static void create_volume_window()
         do
         {
             wm->get_event(ev);
+			printf("CVW ev.type: %d , ev.key: %d \n", ev.type, ev.key);
         }
         while(ev.type == EV_MOUSE_MOVE && wm->IsPending());
 
@@ -371,164 +375,171 @@ void show_sell(int abortable)
 {
 	//AR credits screen, enabled hires image
 
-	if(settings.hires && !credits_hires) credits_hires = cache.img(cache.reg("art/fore/endgame.spe","credit_hires",SPEC_IMAGE,1));
+	if (settings.hires && !credits_hires) credits_hires = cache.img(cache.reg("art/fore/endgame.spe", "credit_hires", SPEC_IMAGE, 1));
 
-  LSymbol *ss = LSymbol::FindOrCreate("sell_screens");
-  if (!DEFINEDP(ss->GetValue()))
-  {
-    LSpace *sp = LSpace::Current;
-    LSpace::Current = &LSpace::Perm;
-//    char *prog="((\"art/help.spe\" . \"sell2\")(\"art/help.spe\" . \"sell4\")(\"art/help.spe\" . \"sell3\")(\"art/fore/endgame.spe\" . \"credit\"))";
-//    char *prog="((\"art/fore/endgame.spe\" . \"credit\") (\"art/help.spe\" . \"sell6\"))";
-    char const *prog = "((\"art/fore/endgame.spe\" . \"credit\"))";
-    ss->SetValue(LObject::Compile(prog));
-    LSpace::Current = sp;
-  }
+	LSymbol *ss = LSymbol::FindOrCreate("sell_screens");
+	if (!DEFINEDP(ss->GetValue()))
+	{
+		LSpace *sp = LSpace::Current;
+		LSpace::Current = &LSpace::Perm;
+	//    char *prog="((\"art/help.spe\" . \"sell2\")(\"art/help.spe\" . \"sell4\")(\"art/help.spe\" . \"sell3\")(\"art/fore/endgame.spe\" . \"credit\"))";
+	//    char *prog="((\"art/fore/endgame.spe\" . \"credit\") (\"art/help.spe\" . \"sell6\"))";
+		char const *prog = "((\"art/fore/endgame.spe\" . \"credit\"))";
+		ss->SetValue(LObject::Compile(prog));
+		LSpace::Current = sp;
+	}
 
-  if (DEFINEDP(ss->GetValue()))
-  {
-    image blank(ivec2(2, 2)); blank.clear();
-    wm->SetMouseShape(blank.copy(), ivec2(0, 0));      // don't show mouse
+	if (DEFINEDP(ss->GetValue()))
+	{
+		image blank(ivec2(2, 2)); blank.clear();
+		wm->SetMouseShape(blank.copy(), ivec2(0, 0));      // don't show mouse
 
-    LObject *tmp = (LObject *)ss->GetValue();
-    int quit=0;
-    while (tmp && !quit)
-    {
-		if(settings.hires && credits_hires) fade_in(credits_hires,16);
-		else
+		LObject *tmp = (LObject *)ss->GetValue();
+		int quit=0;
+		while (tmp && !quit)
 		{
-			int im = cache.reg_object("art/help.spe",CAR(tmp),SPEC_IMAGE,1);
-			fade_in(cache.img(im),16);
-		}
+			if (settings.hires && credits_hires) fade_in(credits_hires, 16);
+			else
+			{
+				int im = cache.reg_object("art/help.spe", CAR(tmp), SPEC_IMAGE, 1);
+				fade_in(cache.img(im), 16);
+			}
 
-      Event ev;
-      do
-      { wm->flush_screen();
-    wm->get_event(ev);
-      } while (ev.type!=EV_KEY);
-      if (ev.key==JK_ESC && abortable)
-        quit=1;
-      fade_out(16);
-      tmp = (LObject *)CDR(tmp);
-    }
-    wm->SetMouseShape(cache.img(c_normal)->copy(), ivec2(1, 1));
-  }
+			Event ev;
+			do
+			{
+				wm->flush_screen();
+				wm->get_event(ev);
+			} while (ev.type!=EV_KEY);
+			if (ev.key==JK_ESC && abortable)
+				quit=1;
+			fade_out(16);
+			tmp = (LObject *)CDR(tmp);
+		}
+		wm->SetMouseShape(cache.img(c_normal)->copy(), ivec2(1, 1));
+	}
 }
 
 
 void menu_handler(Event &ev, InputManager *inm)
 {
-  switch (ev.type)
-  {
-    case EV_MESSAGE :
-    {
-      switch (ev.message.id)
-      {
-    case ID_LIGHT_OFF :
-    if (!volume_window)
-    {
-      gamma_correct(pal,1);
-    } break;
-    case ID_RETURN :
-    if (!volume_window)
-    {
-      the_game->set_state(RUN_STATE);
-    } break;
-    case ID_START_GAME :
-    if (!volume_window)
-    {
-      the_game->load_level(level_file);
-      the_game->set_state(RUN_STATE);
-      view *v;
-      for (v=player_list; v; v=v->next)
-        if (v->m_focus)
-          v->reset_player();
+	printf("menu_handler ev.type: %d , ev.key: 0x%X \n", ev.type, ev.key);
 
-	  settings.quick_load = level_file;//AR
-    } break;
+	switch (ev.type)
+	{
+	case EV_MESSAGE:
+	{
+		switch (ev.message.id)
+		{
+		case ID_LIGHT_OFF:
+			if (!volume_window)
+			{
+				gamma_correct(pal, 1);
+			} break;
+		case ID_RETURN:
+			if (!volume_window)
+			{
+				the_game->set_state(RUN_STATE);
+			} break;
+		case ID_START_GAME:
+			if (!volume_window)
+			{
+				the_game->load_level(level_file);
+				the_game->set_state(RUN_STATE);
+				view *v;
+				for (v=player_list; v; v=v->next)
+					if (v->m_focus)
+						v->reset_player();
 
-
-        case ID_LOAD_PLAYER_GAME :
-    if (!volume_window)
-    {
-      int got_level=load_game(0,symbol_str("LOAD"));
-      the_game->reset_keymap();
-      if (got_level)
-      {
-        char name[255];
-        sprintf(name,"%ssave%04d.spe", get_save_filename_prefix(), got_level);
-
-        the_game->load_level(name);
-        the_game->set_state(RUN_STATE);
-
-		settings.quick_load = name;//AR
-      }
-    } break;
+				settings.quick_load = level_file;//AR
+			} break;
 
 
-    case ID_VOLUME :
-    if (!volume_window)
-    { create_volume_window(); } break;
+		case ID_LOAD_PLAYER_GAME:
+			if (!volume_window)
+			{
+				int got_level=load_game(0, symbol_str("LOAD"));
+				the_game->reset_keymap();
+				if (got_level)
+				{
+					char name[255];
+					sprintf(name, "%ssave%04d.spe", get_save_filename_prefix(), got_level);
 
-    case ID_MEDIUM :
-    {
-      l_difficulty->SetValue(l_medium);
-      save_difficulty();
-    } break;
-    case ID_HARD :
-    {
-      l_difficulty->SetValue(l_hard);
-      save_difficulty();
-    } break;
-    case ID_EXTREME :
-    {
-      l_difficulty->SetValue(l_extreme);
-      save_difficulty();
-    } break;
-    case ID_EASY :
-    {
-      l_difficulty->SetValue(l_easy);
-      save_difficulty();
-    } break;
+					the_game->load_level(name);
+					the_game->set_state(RUN_STATE);
 
-    case ID_NETWORKING :
-    {
-      if (!volume_window)
-      {
-        net_configuration *cfg=new net_configuration;
-        if (cfg->input())
-        {
-          if (main_net_cfg) delete main_net_cfg;
-          main_net_cfg=cfg;
-        } else delete cfg;
-        the_game->draw(0);
-        inm->redraw();
-      }
-    } break;
+					settings.quick_load = name;//AR
+				}
+			} break;
 
-    case ID_SHOW_SELL :
-    if (!volume_window)
-    {
-      show_sell(1);
-      main_screen->clear();
-      if (title_screen>=0)
-      {
-        image *im = cache.img(title_screen);
-        main_screen->PutImage(im, main_screen->Size() / 2 - im->Size() / 2);
-      }
-      inm->redraw();
-      fade_in(NULL,8);
-      wm->flush_screen();
 
-    } break;
-      } break;
-    } break;
-    case EV_CLOSE_WINDOW :
-    {
-      if (ev.window==volume_window)
-      { wm->close_window(volume_window); volume_window=NULL; }
-    } break;
-  }
+		case ID_VOLUME:
+			if (!volume_window)
+			{
+				create_volume_window();
+			} break;
+
+		case ID_MEDIUM:
+		{
+			l_difficulty->SetValue(l_medium);
+			save_difficulty();
+		} break;
+		case ID_HARD:
+		{
+			l_difficulty->SetValue(l_hard);
+			save_difficulty();
+		} break;
+		case ID_EXTREME:
+		{
+			l_difficulty->SetValue(l_extreme);
+			save_difficulty();
+		} break;
+		case ID_EASY:
+		{
+			l_difficulty->SetValue(l_easy);
+			save_difficulty();
+		} break;
+
+		case ID_NETWORKING:
+		{
+			if (!volume_window)
+			{
+				net_configuration *cfg=new net_configuration;
+				if (cfg->input())
+				{
+					if (main_net_cfg) delete main_net_cfg;
+					main_net_cfg=cfg;
+				} else delete cfg;
+				the_game->draw(0);
+				inm->redraw();
+			}
+		} break;
+
+		case ID_SHOW_SELL:
+			if (!volume_window)
+			{
+				show_sell(1);
+				main_screen->clear();
+				if (title_screen>=0)
+				{
+					image *im = cache.img(title_screen);
+					main_screen->PutImage(im, main_screen->Size() / 2 - im->Size() / 2);
+				}
+				inm->redraw();
+				fade_in(NULL, 8);
+				wm->flush_screen();
+
+			} break;
+		} break;
+	} break;
+	case EV_CLOSE_WINDOW:
+	{
+		if (ev.window==volume_window)
+		{
+			wm->close_window(volume_window); volume_window=NULL;
+		}
+	} break;
+	}
 }
 
 void *current_demo=NULL;
@@ -748,6 +759,10 @@ void main_menu()
             {
                 wm->get_event(ev);
             } while (ev.type==EV_MOUSE_MOVE && wm->IsPending());
+
+
+			printf("main_menu toInputHEV ev.type: %d , ev.key: %d \n", ev.type, ev.key);
+
             inm->handle_event(ev,NULL);
             if (ev.type==EV_KEY && ev.key==JK_ESC)
                 wm->Push(new Event(ID_QUIT,NULL));
@@ -818,7 +833,11 @@ void main_menu()
 				wm->SetMousePos(ivec2(mx,my));
 			}
 		}
-		//
+		if (ev.type==EV_KEYRELEASE)
+		{
+			if(ev.key==get_key_binding(settings.ctr_a.c_str(),0))
+				wm->Push(new Event(ID_START_GAME,NULL));
+		}
 
     } while (!stop_menu);
 

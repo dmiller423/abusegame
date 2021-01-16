@@ -75,7 +75,7 @@ down_2=DOWN
 ; CONTROLLER SETTINGS
 
 ; Enable aiming
-ctr_aim=0
+ctr_aim=1
 
 ; Correct crosshair position (x)
 ctr_aim_x=0

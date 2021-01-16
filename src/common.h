@@ -11,6 +11,7 @@
 #ifndef __COMMON_H__
 #define __COMMON_H__
 
+#include <cstdint>
 //
 // Globally required headers
 //
@@ -38,8 +39,14 @@
 using namespace lol;
 
 //
-// Custom utility functions
+// Custom utility functions		-- special kindof stupid here 
 //
+#if 1 // !defined(PS4) && defined(__clang__)
+#define Min(a,b) (((a)<(b)) ? (a):(b))
+#define Max(a,b) (((a)>(b)) ? (a):(b))
+static inline ivec2 iMin(ivec2 a, ivec2 b) { return ivec2(Min(a.x, b.x), Min(a.y, b.y)); }
+static inline ivec2 iMax(ivec2 a, ivec2 b) { return ivec2(Max(a.x, b.x), Max(a.y, b.y)); }
+#else
 static inline int Min(int a, int b) { return a < b ? a : b; }
 static inline int Max(int a, int b) { return a > b ? a : b; }
 static inline unsigned int Min(unsigned int a, unsigned int b) { return a < b ? a : b; }
@@ -50,9 +57,9 @@ static inline unsigned long Min(unsigned long a, unsigned long b) { return a < b
 static inline unsigned long Max(unsigned long a, unsigned long b) { return a > b ? a : b; }
 static inline float Min(float a, float b) { return a < b ? a : b; }
 static inline float Max(float a, float b) { return a > b ? a : b; }
-
 static inline ivec2 Min(ivec2 a, ivec2 b) { return ivec2(Min(a.x, b.x), Min(a.y, b.y)); }
 static inline ivec2 Max(ivec2 a, ivec2 b) { return ivec2(Max(a.x, b.x), Max(a.y, b.y)); }
+#endif
 
 //
 // Byte swapping

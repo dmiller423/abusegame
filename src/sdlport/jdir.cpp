@@ -29,11 +29,75 @@
 #include <sys/types.h>
 #ifdef WIN32
 # include <Windows.h>
-#else
+#elif !defined(PS4)
 # include <dirent.h>
+#else
+#include <string>
+#include <vector>
+#include <kernel.h>
 #endif
 #ifdef HAVE_UNISTD_H
 # include <unistd.h>
+#endif
+
+#ifdef PS4
+
+using namespace std;
+
+struct Dentry {
+	std::string name;
+	uint32_t type;
+};
+
+bool getEntries(const std::string& dir, std::vector<Dentry>& entries, bool wantDots)
+{
+	printf("%s(\"%s\")\n",__func__,dir.c_str());
+
+	static std::vector<char> dentBuff(0x10000,0);
+
+
+	int dfd = open(dir.c_str(), O_RDONLY | O_DIRECTORY);
+	if (dfd > 0) {
+
+		dentBuff.resize(0x10000);	// 64k ought to be enough, really... 
+
+		int dsize = 0;
+		while (0 < (dsize = sceKernelGetdents(dfd, &dentBuff[0], dentBuff.size())))
+		{
+			int offs = 0;
+			dirent *de = (dirent *)&dentBuff[offs];
+
+			while (offs < dsize && de) {
+				de = (dirent *)&dentBuff[offs];
+
+				entries.push_back(Dentry{ std::string(de->d_name), de->d_type });
+
+				printf("$$$ entry fileNo: 0x%08X , type: %jo , name: \"%s\" \n", de->d_fileno, de->d_type, de->d_name);
+
+				offs += de->d_reclen;
+			}
+		}
+
+		close(dfd);
+
+	}
+	else return false;
+
+	return true;
+}
+
+bool getEntries(const char* dir, std::vector<Dentry>& entries, bool wantDots)
+{
+	string sDir(dir);
+	return getEntries(sDir, entries, wantDots);
+}
+
+void debugListApp0()
+{
+	vector<Dentry> dents;
+	if (!getEntries("/app0", dents, true))
+		printf("ERROR: %s() failed!\n",__func__);
+}
 #endif
 
 void get_directory(char *path, char **&files, int &tfiles, char **&dirs, int &tdirs)
@@ -65,7 +129,50 @@ void get_directory(char *path, char **&files, int &tfiles, char **&dirs, int &td
 		}
 	} while( FindNextFile(d, &findData) );
 	FindClose( d );
+#elif defined(PS4)
 
+	//int _d = open(path)
+
+	//klog("---------------------- %s() needs *FIXME*\n", __func__);
+
+	static std::vector<char> dentBuff(0x10000,0);
+
+
+	int dfd = open(path, O_RDONLY | O_DIRECTORY);
+	if (dfd > 0) {
+
+		dentBuff.resize(0x10000);	// 64k ought to be enough, really... 
+
+		int dsize = 0;
+		while (0 < (dsize = sceKernelGetdents(dfd, &dentBuff[0], dentBuff.size())))
+		{
+			int offs = 0;
+			dirent *de = (dirent *)&dentBuff[offs];
+
+			while (offs < dsize && de) {
+				de = (dirent *)&dentBuff[offs];
+
+				if (DT_DIR==de->d_type) {
+					tdirs++;
+					dirs = (char **)realloc(dirs, sizeof(char *)*tdirs);
+					dirs[tdirs - 1] = strdup(de->d_name);
+				}
+				else
+				{
+					tfiles++;
+					files = (char **)realloc(files, sizeof(char *)*tfiles);
+					files[tfiles - 1] = strdup(de->d_name);
+				}
+
+				printf("$$$ entry fileNo: 0x%08X , type: %jo , name: \"%s\" \n", de->d_fileno, de->d_type, de->d_name);
+
+				offs += de->d_reclen;
+			}
+		}
+
+		close(dfd);
+
+	}
 #else
     DIR *d = opendir( path );
 

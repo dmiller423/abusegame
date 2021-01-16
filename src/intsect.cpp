@@ -12,6 +12,7 @@
 #   include "config.h"
 #endif
 
+#include <cstdint>
 #include <stdlib.h>
 #include <SDL_config.h>//AR (#include <SDL_config.h>)
 

@@ -18,7 +18,14 @@ else()
     set(abuse_RESOURCE_FILES "")
 endif()
 
-add_executable(abuse
+# more stupidity as usual
+if (TARGET_PS4)
+	set(CMAKE_BUILD_WITH_INSTALL_RPATH On)
+
+	set(PLATFORM_FILES ps4/kernel_utils.c ps4/util.S)
+endif()
+
+add_executable(abuse ${PLATFORM_FILES}
     common.h
     lol/matrix.cpp lol/matrix.h
     lol/timer.cpp lol/timer.h
@@ -76,23 +83,27 @@ add_executable(abuse
     ${abuse_RESOURCE_FILES}
 )
 
+if (NOT PS4)
 set_target_properties(abuse PROPERTIES MACOSX_BUNDLE true)
 # Note this doesn't install the icon, that's done later
 set_target_properties(abuse PROPERTIES MACOSX_BUNDLE_ICON_FILE "abuse")
 set_target_properties(abuse PROPERTIES MACOSX_BUNDLE_BUNDLE_NAME "Abuse")
 set_target_properties(abuse PROPERTIES MACOSX_BUNDLE_SHORT_VERSION_STRING "${abuse_VERSION}")
 set_target_properties(abuse PROPERTIES MACOSX_BUNDLE_BUNDLE_VERSION "${abuse_VERSION}")
+endif (NOT PS4)
 
 target_link_libraries(abuse lisp)
 target_link_libraries(abuse sdlport)
 target_link_libraries(abuse imlib)
 target_link_libraries(abuse net)
-target_link_libraries(abuse ${SDL2_LIBRARY})
+target_link_libraries(abuse ${SDL2_LIBRARIES})
 target_link_libraries(abuse ${SDL2_MIXER_LIBRARIES})
 if(OPENGL_FOUND)
     target_link_libraries(abuse ${OPENGL_LIBRARIES})
 endif(OPENGL_FOUND)
 
+
+if (OFF) #NOT PS4)
 add_executable(abuse-tool
 	tool/abuse-tool.cpp
 	crc.cpp crc.h
@@ -100,6 +111,7 @@ add_executable(abuse-tool
 	tool/AR_Help.cpp tool/AR_Help.h)
 
 target_link_libraries(abuse-tool imlib)
+endif(NOT PS4)
 
 include_directories(
     ${abuse_SOURCE_DIR}/src
@@ -111,7 +123,7 @@ include_directories(
 )
 if(WIN32)
     # Under Windows, throw them into the root
-    install(TARGETS abuse abuse-tool
+    install(TARGETS abuse #abuse-tool
         RUNTIME DESTINATION "."
         LIBRARY DESTINATION ".")
     # We also need to include the SDL DLLs or nothing will work
@@ -131,7 +143,7 @@ if(WIN32)
     endif()
     get_filename_component(SDL2MIXER_DLL_PATH "${SDL2MIXER_DLL_PATH}" DIRECTORY)
     install(FILES ${SDL2MIXER_DLL_PATH}/SDL2_mixer.dll DESTINATION ".")
-else()
+elseif(NOT PS4)
     # Under Linux, we want the tools in bin
     install(TARGETS abuse abuse-tool RUNTIME DESTINATION bin
     BUNDLE DESTINATION "${CMAKE_INSTALL_PREFIX}")

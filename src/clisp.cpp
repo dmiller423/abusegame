@@ -953,6 +953,8 @@ void *l_caller(long number, void *args)
 #if defined __CELLOS_LV2__
       /* FIXME: retrieve the PS3 account name */
       char const *cd = "Player";
+#elif defined PS4
+		char const *cd = "/app0";
 #else
       char cd[150];
       getcwd(cd, 100);
@@ -960,7 +962,7 @@ void *l_caller(long number, void *args)
       return LString::Create(cd);
     } break;
     case 55 :
-#if !defined __CELLOS_LV2__
+#if !defined(__CELLOS_LV2__) && !defined(PS4)
       /* FIXME: this looks rather dangerous */
       system(lstring_value(CAR(args)->Eval()));
 #endif

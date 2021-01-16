@@ -261,9 +261,9 @@ void image::PutPart(image *im, ivec2 pos, ivec2 aa, ivec2 bb, int transparent)
 
     // see if the are to be put is outside of actual image, if so adjust
     // to fit in the image
-    pos += Min(aa, ivec2(0));
-    aa += Min(aa, ivec2(0));
-    bb = Min(bb, im->m_size);
+    pos += iMin(aa, ivec2(0));
+    aa += iMin(aa, ivec2(0));
+    bb = iMin(bb, im->m_size);
     // return if it was adjusted so that nothing will be put
     if (!(aa < bb))
         return;
@@ -272,9 +272,9 @@ void image::PutPart(image *im, ivec2 pos, ivec2 aa, ivec2 bb, int transparent)
     if (!(pos < cbb && pos + (bb - aa) > caa))
         return;
 
-    aa += Max(caa - pos, ivec2(0));
-    pos += Max(caa - pos, ivec2(0));
-    bb = Min(bb, cbb - pos + aa);
+    aa += iMax(caa - pos, ivec2(0));
+    pos += iMax(caa - pos, ivec2(0));
+    bb = iMin(bb, cbb - pos + aa);
     if (!(aa < bb))
         return;
 
@@ -509,8 +509,8 @@ void image_descriptor::AddDirty(ivec2 aa, ivec2 bb)
     if (!keep_dirt)
         return;
 
-    aa = Max(aa, ivec2(0));
-    bb = Min(bb, m_size);
+    aa = iMax(aa, ivec2(0));
+    bb = iMin(bb, m_size);
 
     if (!(aa < bb))
         return;

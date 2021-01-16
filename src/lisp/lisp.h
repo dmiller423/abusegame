@@ -11,6 +11,7 @@
 #ifndef __LISP_HPP_
 #define __LISP_HPP_
 
+#include <cstdint>
 #include <cstdlib>
 #include <SDL_config.h>//AR (#include <SDL_config.h>)
 

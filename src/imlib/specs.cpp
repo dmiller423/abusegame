@@ -385,6 +385,8 @@ bFILE *open_file(char const *filename, char const *mode)
     }
     else
     {
+		printf("----%s(\"%s\", \"%s\")\n",__func__,filename,mode);
+		
       return new jFILE(filename,mode);
     }
   }

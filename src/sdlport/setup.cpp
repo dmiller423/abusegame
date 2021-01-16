@@ -36,7 +36,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <sys/stat.h>
+#ifndef PS4
 #include <signal.h>
+#endif
 #include <string>
 #include "SDL.h"
 
@@ -568,13 +570,16 @@ void setup( int argc, char **argv )
 	//AR
 	printf( "%s %s\n", "Abuse", "0.9a" );
 
+	std::string sep = std::string(80,'_') + "\n";
+	printf(sep.c_str());	printf("------ c1 -----\n");	printf(sep.c_str());
     // Initialize SDL with video and audio support
     if( SDL_Init( SDL_INIT_VIDEO | SDL_INIT_AUDIO | SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER ) < 0 )
     {
-        show_startup_error( "Unable to initialize SDL : %s\n", SDL_GetError() );
+        printf( "Unable to initialize SDL : %s\n", SDL_GetError() );	// can't use msgbox if sdl not init
         exit( 1 );
     }
     atexit( SDL_Quit );
+	printf(sep.c_str());	printf("------ c11 -----\n");	printf(sep.c_str());
 
     // Set the savegame directory
     char *homedir;
@@ -601,6 +606,11 @@ void setup( int argc, char **argv )
     set_save_filename_prefix(savedir);
     CoTaskMemFree(appData);
     free( savedir );
+
+#elif defined(PS4)
+	printf(sep.c_str());	printf("------ c2 -----\n");	printf(sep.c_str());
+	homedir = "/app0";
+	set_save_filename_prefix("/data/abusegame");
 #else
     if( (homedir = getenv( "HOME" )) != NULL )
     {
@@ -663,19 +673,24 @@ void setup( int argc, char **argv )
     printf("Setting data dir to %s\n", assetDirName);
     set_filename_prefix( assetDirName );
 #else
+
+	printf(sep.c_str());	printf("------ c22 ASSETDIR: \"%s\" -----\n",ASSETDIR);	printf(sep.c_str());
     set_filename_prefix( ASSETDIR );
 #endif
 
+	printf(sep.c_str());	printf("------ c3 -----\n");	printf(sep.c_str());
 	//handle command-line parameters
     parseCommandLine(argc,argv);
 
+	printf(sep.c_str());	printf("------ c4 -----\n");	printf(sep.c_str());
 	//AR override save game directory to local directory
 	if(settings.local_save) set_save_filename_prefix("user/");
 
 	printf("Setting save dir to %s\n", get_save_filename_prefix());
 
     // Load the users configuration
-    settings.ReadConfigFile(get_save_filename_prefix());
+    if(!settings.ReadConfigFile(get_save_filename_prefix()))
+		printf("failed to read config file!\n");
 
 	// Initialize default settings
 	scale = settings.scale;

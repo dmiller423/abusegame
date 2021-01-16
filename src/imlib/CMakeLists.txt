@@ -26,7 +26,7 @@ add_library(imlib
     timing.h jdir.h visobj.h
 )
 
-include_directories(${abuse_SOURCE_DIR}/src)
+include_directories(${abuse_SOURCE_DIR}/src ${SDL2_INCLUDE_DIR})
 add_definitions(-DNO_CHECK)
 #INCLUDES = -I$(srcdir) -I$(srcdir)/.. $(SDL2_CFLAGS)
 

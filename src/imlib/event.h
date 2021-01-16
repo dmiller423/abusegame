@@ -37,6 +37,8 @@ class Jwindow;
 
 class Event : public linked_node
 {
+	void* sdl_ev;
+
 public:
     Event()
     {

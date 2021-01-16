@@ -1,0 +1,67 @@
+﻿{
+	"environments": [
+		{
+			"BuildPath": "${projectDir}\\build\\${workspaceHash}",
+			"InstallPath": "${projectDir}\\build\\install\\${name}",
+			"clangcl": "clang-cl.exe"
+		},
+		{
+			"TOOLCHAIN_FILE": "ps4sdk.cmake",
+			"environment": "toolchain.generic"
+		}
+	],
+	"configurations": [
+		{
+			"name": "x64-Release",
+			"generator": "Ninja",
+			"configurationType": "RelWithDebInfo",
+			"inheritEnvironments": [ "msvc_x64_x64" ],
+			"buildRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\build\\${name}",
+			"installRoot": "${env.USERPROFILE}\\CMakeBuilds\\${workspaceHash}\\install\\${name}",
+			"cmakeCommandArgs": "",
+			"buildCommandArgs": "-v",
+			"ctestCommandArgs": "",
+			"variables": []
+		},
+		{
+			"name": "win-x64-Clang-Debug",
+			"generator": "Ninja",
+			"description": "TemplateDescription_Localize_x64Release",
+			"configurationType": "Debug",
+			"inheritEnvironments": [ "msvc_x64_x64" ],
+			"buildRoot": "${env.BuildPath}\\${name}",
+			"installRoot": "${env.InstallPath}\\${name}",
+			"cmakeCommandArgs": "",
+			"buildCommandArgs": "-v",
+			"ctestCommandArgs": "",
+			"variables": [
+				{
+					"name": "CMAKE_C_COMPILER",
+					"value": "${env.clangcl}",
+					"type": "STRING"
+				},
+				{
+					"name": "CMAKE_CXX_COMPILER",
+					"value": "${env.clangcl}",
+					"type": "STRING"
+				}
+			],
+			"intelliSenseMode": "windows-clang-x64"
+		},
+		{
+			"name": "PS4 SDK",
+			"generator": "Ninja",
+			"description": "TemplateDescription_Localize_PS4SDK",
+			"configurationType": "RelWithDebInfo",
+			"inheritEnvironments": [ "toolchain.generic" ],
+			"buildRoot": "${projectDir}\\build\\${workspaceHash}",
+			"installRoot": "${projectDir}\\build\\install\\${name}",
+			"cmakeCommandArgs": "",
+			"buildCommandArgs": "-v",
+			"ctestCommandArgs": "",
+			"cmakeExecutable": "C:/dev/util/CMake/bin/cmake.exe",
+			"cmakeToolchain": "${projectDir}\\cmake\\ps4sdk.cmake",
+			"variables": []
+		}
+	]
+}
